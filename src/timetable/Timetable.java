@@ -23,7 +23,7 @@ public class Timetable {
      */
     static ArrayList<String[]> input= new ArrayList<String[]>();
     static ArrayList<Subject> subjectList= new ArrayList<Subject>();
-    static ArrayList<String> rooms= new ArrayList<String>();
+    static ArrayList<Room> rooms= new ArrayList<Room>();
     public static void main(String[] args) {
         // TODO code application logic here
         System.out.println("Enter input file path: ");
@@ -47,7 +47,14 @@ public class Timetable {
             subjectList.add(sbj);
         }
         for(String x:input.get(input.size()-1)){
-            rooms.add(x);
+            Room room = new Room(x);
+            rooms.add(room);
+        }
+        
+        while(checkAllAssigned()){
+            Subject sbj = findSubjectWithMaximumPossibleTimeSlots();
+            sbj.assigned=true;
+            System.out.println(sbj.getName());
         }
         
         System.out.println("finished");
@@ -59,7 +66,6 @@ public class Timetable {
     static Subject getSubject(String[] array){
         String name = array[0];
         boolean cmplsr;
-        System.out.println(array[1]);
         if(array[1].toString().contains("c")){
             cmplsr=true;
         }else{
@@ -69,5 +75,27 @@ public class Timetable {
         Subject sbj =  new Subject(cmplsr,name,timeslts);
         return sbj;
     }
+    
+    static Subject findSubjectWithMaximumPossibleTimeSlots(){
+        int max = 0;
+        Subject subject= null;
+        for(Subject sbj: subjectList){
+            if(sbj.getNoOfPossibleTimeSlots()>max){
+                max = sbj.getNoOfPossibleTimeSlots();
+                subject = sbj;   
+            }
+        }
+        return subject;
+    }
+    //check this
+     static boolean checkAllAssigned(){
+         for(Subject sbj : subjectList){
+             if(sbj.assigned==false){
+                 return false;
+             }
+         }
+         return true;
+     }
+         
     
 }
