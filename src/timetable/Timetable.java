@@ -23,7 +23,7 @@ public class Timetable {
      */
     static ArrayList<String[]> input= new ArrayList<String[]>();
     static ArrayList<Subject> subjectList= new ArrayList<Subject>();
-    static ArrayList<Room> rooms= new ArrayList<Room>();
+    static ArrayList<String> rooms= new ArrayList<String>();
     public static void main(String[] args) {
         // TODO code application logic here
         System.out.println("Enter input file path: ");
@@ -42,20 +42,19 @@ public class Timetable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        for(int i=0;i<input.size()-1;i++){
+        
+        for(String x:input.get(input.size()-1)){
+            rooms.add(x);
+        }
+        
+        
+        for(int i=0;i<input.size()-1;i++){      //adding subjects to subjects array
             Subject sbj = getSubject(input.get(i));
             subjectList.add(sbj);
         }
-        for(String x:input.get(input.size()-1)){
-            Room room = new Room(x);
-            rooms.add(room);
-        }
         
-        while(checkAllAssigned()){
-            Subject sbj = findSubjectWithMaximumPossibleTimeSlots();
-            sbj.assigned=true;
-            System.out.println(sbj.getName());
-        }
+        
+        
         
         System.out.println("finished");
         
@@ -88,13 +87,14 @@ public class Timetable {
         return subject;
     }
     //check this
-     static boolean checkAllAssigned(){
+     static boolean AllAssigned(){
+         boolean output=true;
          for(Subject sbj : subjectList){
              if(sbj.assigned==false){
-                 return false;
+                 output=false;
              }
          }
-         return true;
+         return output;
      }
          
     
