@@ -31,15 +31,15 @@ public class Timetable {
     static ArrayList<Subject> subjectList= new ArrayList<Subject>();            //to hold the subjects list
     static ArrayList<String> timeSlots = new ArrayList<>();                     //to hold the time slots
     static ArrayList<String> rooms= new ArrayList<String>();                    
-    static ArrayList<String> generatedAllTimeSlots = new ArrayList<>();         //
-    static ArrayList<String> compulsoryTimeSlots = new ArrayList<>();
-    static ArrayList<String> assignedTimeSlots = new ArrayList<>();
+    static ArrayList<String> generatedAllTimeSlots = new ArrayList<>();         //all time slots according to the number of rooms will be generated as the format of "Time_Slot,Room" and will be stored here
+    static ArrayList<String> compulsoryTimeSlots = new ArrayList<>();           //save the timeslots which has been allocated to compulsory subjects
+    static ArrayList<String> assignedTimeSlots = new ArrayList<>();             //array which will be used to keep track of assigned tome slots
     public static void main(String[] args) {
         // TODO code application logic here
         System.out.println("Enter input file path: ");
         Scanner scanner = new Scanner(System.in);
-        String inputFilePath = scanner.nextLine();
-        System.out.println("Enter output file path: ");
+        String inputFilePath = scanner.nextLine();                              //variable to save input  fie path
+        System.out.println("Enter output file path: ");                         //ouput file path
         String outputFilePath = scanner.nextLine();
         String text="";
         try (BufferedReader br = new BufferedReader(new FileReader(inputFilePath))) {
@@ -53,7 +53,7 @@ public class Timetable {
             e.printStackTrace();
         }
         
-        for(String x:input.get(input.size()-1)){
+        for(String x:input.get(input.size()-1)){                                //adding rooms to array
             rooms.add(x);
         }
         
@@ -71,7 +71,7 @@ public class Timetable {
 
     }
     
-    static Subject getSubject(String[] array){
+    static Subject getSubject(String[] array){                                  //create subjects
         String name = array[0];
         boolean cmplsr;
         if(array[1].toString().contains("c")){
@@ -91,7 +91,7 @@ public class Timetable {
     
     
     //check this
-     static boolean AllAssigned(){
+     static boolean AllAssigned(){                                              //check wether all subjects are assigned
          boolean output=true;
          for(Subject sbj : subjectList){
              if(sbj.assigned==false){
@@ -102,22 +102,22 @@ public class Timetable {
      }
      
      static void assignTime(int index){
-         for(String timeSlot:generatedAllTimeSlots){
-             if(timeSlotIsAvailable(index,timeSlot)){
-                 if(subjectList.get(index).compulsory){
-                     if(subjectList.get(index).assigned){
-                         assignedTimeSlots.remove(subjectList.get(index).getAssignedTimeSlot()+","+subjectList.get(index).getAssignedRoom());
-                         removeFromCompulsory(subjectList.get(index).getAssignedTimeSlot());
+         for(String timeSlot:generatedAllTimeSlots){                            //checking time slots
+             if(timeSlotIsAvailable(index,timeSlot)){                           //checking the availability of time slots
+                 if(subjectList.get(index).compulsory){                 
+                     if(subjectList.get(index).assigned){                       //assigning rooms for com subs if it is already assigned 
+                         assignedTimeSlots.remove(subjectList.get(index).getAssignedTimeSlot()+","+subjectList.get(index).getAssignedRoom());       //remove it from the assigned array
+                         removeFromCompulsory(subjectList.get(index).getAssignedTimeSlot());    //remove from compulsory time slots
                          subjectList.get(index).assignTimeSlot(timeSlot);
                          assignedTimeSlots.add(timeSlot);
                          addTimeSlotToCompulsory(timeSlot);
                      }else{
-                         subjectList.get(index).assignTimeSlot(timeSlot);
+                         subjectList.get(index).assignTimeSlot(timeSlot);       //assign rooms for not assigned compulsory subs
                          assignedTimeSlots.add(timeSlot);
                          addTimeSlotToCompulsory(timeSlot);
                      }
                  }else{
-                     if(subjectList.get(index).assigned){
+                     if(subjectList.get(index).assigned){                           // for optional subs
                          assignedTimeSlots.remove(subjectList.get(index).getAssignedTimeSlot()+","+subjectList.get(index).getAssignedRoom());
                          subjectList.get(index).assignTimeSlot(timeSlot);
                          assignedTimeSlots.add(timeSlot);
@@ -127,9 +127,9 @@ public class Timetable {
                      }
                  }
                  if(index+1<subjectList.size()){
-                     assignTime(index+1);
+                     assignTime(index+1);                                   //recursive function which is used to assign value if the first one succeeded
                  }else{
-                     return;
+                     return;                                            //will return to backtrack if no possible time slot found
                  }
                  
              }
@@ -145,10 +145,7 @@ public class Timetable {
         }
     }
      
-    static boolean timeSlotIsAvailable(int index, String timeSlot){
-        boolean a = checkInCompulsory(timeSlot);
-        boolean b = checkTimeSlotIsAssigned(timeSlot);
-       boolean c =  subjectList.get(index).isAvailableOnTimeSlot(timeSlot);
+    static boolean timeSlotIsAvailable(int index, String timeSlot){             //check wether a given time slot is available
         
         if(checkInCompulsory(timeSlot) && checkTimeSlotIsAssigned(timeSlot) && 
                 subjectList.get(index).isAvailableOnTimeSlot(timeSlot)){
