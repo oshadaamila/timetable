@@ -8,9 +8,15 @@ package timetable;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -22,10 +28,10 @@ public class Timetable {
      * @param args the command line arguments
      */
     static ArrayList<String[]> input= new ArrayList<String[]>();
-    static ArrayList<Subject> subjectList= new ArrayList<Subject>();
-    static ArrayList<String> timeSlots = new ArrayList<>();
-    static ArrayList<String> rooms= new ArrayList<String>();
-    static ArrayList<String> generatedAllTimeSlots = new ArrayList<>();
+    static ArrayList<Subject> subjectList= new ArrayList<Subject>();            //to hold the subjects list
+    static ArrayList<String> timeSlots = new ArrayList<>();                     //to hold the time slots
+    static ArrayList<String> rooms= new ArrayList<String>();                    
+    static ArrayList<String> generatedAllTimeSlots = new ArrayList<>();         //
     static ArrayList<String> compulsoryTimeSlots = new ArrayList<>();
     static ArrayList<String> assignedTimeSlots = new ArrayList<>();
     public static void main(String[] args) {
@@ -58,8 +64,8 @@ public class Timetable {
         }
         generateAllTimeSlots();
         assignTime(0);
-        
-        System.out.println("Test");
+        writeToFile(outputFilePath);
+        System.out.println("finished");
         
         
 
@@ -99,17 +105,30 @@ public class Timetable {
          for(String timeSlot:generatedAllTimeSlots){
              if(timeSlotIsAvailable(index,timeSlot)){
                  if(subjectList.get(index).compulsory){
-                     subjectList.get(index).assignTimeSlot(timeSlot);
-                     assignedTimeSlots.add(timeSlot);
-                     addTimeSlotToCompulsory(timeSlot);
+                     if(subjectList.get(index).assigned){
+                         assignedTimeSlots.remove(subjectList.get(index).getAssignedTimeSlot()+","+subjectList.get(index).getAssignedRoom());
+                         removeFromCompulsory(subjectList.get(index).getAssignedTimeSlot());
+                         subjectList.get(index).assignTimeSlot(timeSlot);
+                         assignedTimeSlots.add(timeSlot);
+                         addTimeSlotToCompulsory(timeSlot);
+                     }else{
+                         subjectList.get(index).assignTimeSlot(timeSlot);
+                         assignedTimeSlots.add(timeSlot);
+                         addTimeSlotToCompulsory(timeSlot);
+                     }
                  }else{
-                     subjectList.get(index).assignTimeSlot(timeSlot);
-                     assignedTimeSlots.add(timeSlot);
+                     if(subjectList.get(index).assigned){
+                         assignedTimeSlots.remove(subjectList.get(index).getAssignedTimeSlot()+","+subjectList.get(index).getAssignedRoom());
+                         subjectList.get(index).assignTimeSlot(timeSlot);
+                         assignedTimeSlots.add(timeSlot);
+                     }else{
+                         subjectList.get(index).assignTimeSlot(timeSlot);
+                         assignedTimeSlots.add(timeSlot);
+                     }
                  }
                  if(index+1<subjectList.size()){
                      assignTime(index+1);
                  }else{
-                     System.out.println("shit");
                      return;
                  }
                  
@@ -161,6 +180,29 @@ public class Timetable {
         String [] timeArray = timeSlot.split(",");
         String onlyTime =  timeArray[0];
         compulsoryTimeSlots.add(onlyTime);
+    }
+    static void removeFromCompulsory(String timeSlot){
+        String [] timeArray = timeSlot.split(",");
+        String onlyTime =  timeArray[0];
+        compulsoryTimeSlots.remove(onlyTime);
+    }
+    
+    static void writeToFile(String path){
+        if(AllAssigned()){
+            Path file = Paths.get(path);
+            ArrayList<String> lines = new ArrayList<String>();
+            for(Subject sbj: subjectList){
+                lines.add(sbj.getName()+","+sbj.getAssignedTimeSlot()+","+sbj.getAssignedRoom());
+            }
+            try {
+                Files.write(file,lines, Charset.forName("UTF-8"));
+            } catch (IOException ex) {
+                Logger.getLogger(Timetable.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }else{
+            System.out.println("Cannot Assign TimeSlots");
+        }
     }
     
     
